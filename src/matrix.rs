@@ -206,7 +206,7 @@ impl Matrix {
                 let len = self.elements[to_row].len();
                 for i in 0..len {
                     let xy = (to_row, i);
-                    self.set(xy, self.get(xy)? * scaler_row[i])?;
+                    self.set(xy, self.get(xy)? + scaler_row[i])?;
                 }
             }
             // Ignore
