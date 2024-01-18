@@ -16,8 +16,8 @@ pub enum Operations {
     },
     ReplaceWithMultiple {
         scaler: Fraction, // cannot be zero
-        from_row: usize,
-        to_row: usize,
+        scaler_row: usize,
+        target_row: usize,
     },
     ShowHelp,
 }
@@ -106,7 +106,7 @@ impl TryFrom<&str> for Operations {
                     ));
                 };
 
-                let (from_row, to_row) = if let Some(rows) = rows.split_once(' ') {
+                let (scaler_row, target_row) = if let Some(rows) = rows.split_once(' ') {
                     rows
                 } else {
                     return Err(format!(
@@ -118,27 +118,27 @@ impl TryFrom<&str> for Operations {
                 let scaler = Fraction::from_str(scaler)
                     .map_err(|e| format!("Failed to parse \"{}\". {}", scaler, e))?;
 
-                let (from_row, to_row) = (
-                    from_row
+                let (scaler_row, target_row) = (
+                    scaler_row
                         .to_lowercase()
                         .chars()
                         .filter(|c| *c != 'r')
                         .collect::<String>()
                         .parse::<usize>()
-                        .map_err(|_| format!("Failed to parse \"{}\".", from_row))?,
-                    to_row
+                        .map_err(|_| format!("Failed to parse \"{}\".", scaler_row))?,
+                    target_row
                         .to_lowercase()
                         .chars()
                         .filter(|c| *c != 'r')
                         .collect::<String>()
                         .parse::<usize>()
-                        .map_err(|_| format!("Failed to parse \"{}\".", to_row))?,
+                        .map_err(|_| format!("Failed to parse \"{}\".", target_row))?,
                 );
 
                 Ok(Self::ReplaceWithMultiple {
                     scaler,
-                    from_row,
-                    to_row,
+                    scaler_row,
+                    target_row,
                 })
             }
             _ => Err(format!("\"{}\" is not a valid operation.", op)),
@@ -156,11 +156,11 @@ impl fmt::Display for Operations {
             }
             ReplaceWithMultiple {
                 scaler,
-                from_row,
-                to_row,
+                scaler_row,
+                target_row,
             } => f.write_fmt(format_args!(
                 "{} * R{} + R{} -> R{}",
-                scaler, from_row, to_row, to_row
+                scaler, scaler_row, target_row, target_row
             )),
             ShowHelp => f.write_str("ShowHelp"),
         }

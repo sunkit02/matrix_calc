@@ -1,8 +1,9 @@
-use std::fmt::{self, Formatter, Write};
+use std::{
+    fmt::{self, Formatter, Write},
+    usize,
+};
 
 use fraction::Fraction;
-
-use crate::operations::Operations;
 
 pub struct Matrix {
     elements: Vec<Vec<Fraction>>,
@@ -157,83 +158,70 @@ impl Matrix {
         self.checksum
     }
 
-    pub fn operate(&mut self, op: Operations) -> Result<(), String> {
-        match op {
-            Operations::SwapRows { lhs, rhs } => {
-                if lhs >= self.height() {
-                    return Err(format!(
-                        "Invalid row. Matrix max row index is {}, Got: {}.",
-                        self.height() - 1,
-                        lhs
-                    ));
-                }
-                if rhs >= self.height() {
-                    return Err(format!(
-                        "Invalid row. Matrix max row index is {}, Got: {}.",
-                        self.height() - 1,
-                        rhs
-                    ));
-                }
+    pub fn swap_rows(&mut self, lhs: usize, rhs: usize) -> Result<(), String> {
+        if lhs >= self.height() {
+            return Err(format!(
+                "Invalid row. Matrix max row index is {}, Got: {}.",
+                self.height() - 1,
+                lhs
+            ));
+        }
+        if rhs >= self.height() {
+            return Err(format!(
+                "Invalid row. Matrix max row index is {}, Got: {}.",
+                self.height() - 1,
+                rhs
+            ));
+        }
 
-                self.elements.swap(lhs, rhs);
+        self.elements.swap(lhs, rhs);
 
-                for i in 0..self.elements[lhs].len() {
-                    let old = self.elements[rhs][i];
-                    let new = self.elements[lhs][i];
+        for i in 0..self.elements[lhs].len() {
+            let old = self.elements[rhs][i];
+            let new = self.elements[lhs][i];
 
-                    let diff =
-                        calc_checksum(&Fraction::from(rhs as u64), &Fraction::from(i as u64), &old)
-                            - calc_checksum(
-                                &Fraction::from(lhs as f64),
-                                &Fraction::from(i as f64),
-                                &new,
-                            );
-                    self.checksum += diff;
-                }
+            let diff = calc_checksum(&Fraction::from(rhs as u64), &Fraction::from(i as u64), &old)
+                - calc_checksum(&Fraction::from(lhs as f64), &Fraction::from(i as f64), &new);
+            self.checksum += diff;
+        }
 
-                for i in 0..self.elements[rhs].len() {
-                    let old = self.elements[lhs][i];
-                    let new = self.elements[rhs][i];
+        for i in 0..self.elements[rhs].len() {
+            let old = self.elements[lhs][i];
+            let new = self.elements[rhs][i];
 
-                    let diff =
-                        calc_checksum(&Fraction::from(lhs as u64), &Fraction::from(i as u64), &old)
-                            - calc_checksum(
-                                &Fraction::from(rhs as f64),
-                                &Fraction::from(i as f64),
-                                &new,
-                            );
-                    self.checksum += diff;
-                }
-            }
-            Operations::Multiply { row, scaler } => {
-                // for n in &mut self.elements[row] {
-                //     *n *= scaler
-                // }
-                //
-                let len = self.elements[row].len();
-                for i in 0..len {
-                    let xy = (row, i);
-                    self.set(xy, self.get(xy)? * scaler)?;
-                }
-            }
-            Operations::ReplaceWithMultiple {
-                scaler,
-                from_row,
-                to_row,
-            } => {
-                let scaler_row = self.elements[from_row]
-                    .iter()
-                    .map(|n| n * scaler)
-                    .collect::<Vec<_>>();
+            let diff = calc_checksum(&Fraction::from(lhs as u64), &Fraction::from(i as u64), &old)
+                - calc_checksum(&Fraction::from(rhs as f64), &Fraction::from(i as f64), &new);
+            self.checksum += diff;
+        }
 
-                let len = self.elements[to_row].len();
-                for i in 0..len {
-                    let xy = (to_row, i);
-                    self.set(xy, self.get(xy)? + scaler_row[i])?;
-                }
-            }
-            // Ignore
-            Operations::ShowHelp => {}
+        Ok(())
+    }
+
+    pub fn multiply_row(&mut self, row: usize, scaler: Fraction) -> Result<(), String> {
+        let len = self.elements[row].len();
+        for i in 0..len {
+            let xy = (row, i);
+            self.set(xy, self.get(xy)? * scaler)?;
+        }
+
+        Ok(())
+    }
+
+    pub fn replace_row_with_multiple(
+        &mut self,
+        scaler: Fraction,
+        scaler_row: usize,
+        target_row: usize,
+    ) -> Result<(), String> {
+        let scaler_row = self.elements[scaler_row]
+            .iter()
+            .map(|n| n * scaler)
+            .collect::<Vec<_>>();
+
+        let len = self.elements[target_row].len();
+        for i in 0..len {
+            let xy = (target_row, i);
+            self.set(xy, self.get(xy)? + scaler_row[i])?;
         }
 
         Ok(())

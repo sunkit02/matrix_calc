@@ -85,7 +85,25 @@ fn main() {
         println!("$ {}\n", op);
         match op {
             Operations::ShowHelp => print_help_menu(),
-            op => match matrix.operate(op) {
+            Operations::SwapRows { lhs, rhs } => match matrix.swap_rows(lhs, rhs) {
+                Ok(_) => {
+                    println!("Matrix (checksum: {}):", matrix.checksum());
+                    println!("\n{}\n", matrix);
+                }
+                Err(e) => println!("Error: {}", e),
+            },
+            Operations::Multiply { row, scaler } => match matrix.multiply_row(row, scaler) {
+                Ok(_) => {
+                    println!("Matrix (checksum: {}):", matrix.checksum());
+                    println!("\n{}\n", matrix);
+                }
+                Err(e) => println!("Error: {}", e),
+            },
+            Operations::ReplaceWithMultiple {
+                scaler,
+                scaler_row,
+                target_row,
+            } => match matrix.replace_row_with_multiple(scaler, scaler_row, target_row) {
                 Ok(_) => {
                     println!("Matrix (checksum: {}):", matrix.checksum());
                     println!("\n{}\n", matrix);
