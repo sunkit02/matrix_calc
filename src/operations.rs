@@ -1,4 +1,9 @@
-use std::fmt::{self, Formatter};
+use std::{
+    fmt::{self, Formatter},
+    str::FromStr,
+};
+
+use fraction::Fraction;
 
 pub enum Operations {
     SwapRows {
@@ -7,10 +12,10 @@ pub enum Operations {
     },
     Multiply {
         row: usize,
-        scaler: f64,
+        scaler: Fraction,
     },
     ReplaceWithMultiple {
-        scaler: f64, // cannot be zero
+        scaler: Fraction, // cannot be zero
         from_row: usize,
         to_row: usize,
     },
@@ -78,9 +83,8 @@ impl TryFrom<&str> for Operations {
                     ));
                 };
 
-                let scaler = scaler
-                    .parse::<f64>()
-                    .map_err(|_| format!("Failed to parse \"{}\".", scaler))?;
+                let scaler = Fraction::from_str(scaler)
+                    .map_err(|e| format!("Failed to parse \"{}\". {}", scaler, e))?;
 
                 let row = row
                     .to_lowercase()
@@ -111,9 +115,8 @@ impl TryFrom<&str> for Operations {
                     ));
                 };
 
-                let scaler = scaler
-                    .parse::<f64>()
-                    .map_err(|_| format!("Failed to parse \"{}\".", scaler))?;
+                let scaler = Fraction::from_str(scaler)
+                    .map_err(|e| format!("Failed to parse \"{}\". {}", scaler, e))?;
 
                 let (from_row, to_row) = (
                     from_row
