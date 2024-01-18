@@ -22,7 +22,7 @@ impl fmt::Display for Matrix {
         }
 
         for (i, row) in self.elements.iter().enumerate() {
-            f.write_fmt(format_args!("[{}] ", i))?;
+            f.write_fmt(format_args!("({}) [", i))?;
             for (j, n) in row.iter().enumerate() {
                 f.write_fmt(format_args!("{}", n))?;
                 if j < row.len() - 1 {
