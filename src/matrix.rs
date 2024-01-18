@@ -227,5 +227,5 @@ impl Matrix {
 }
 
 fn calc_checksum(x: f64, y: f64, n: f64) -> f64 {
-    (x + y) * n
+    (x * n) + y
 }
