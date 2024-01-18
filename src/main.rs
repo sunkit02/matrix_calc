@@ -92,15 +92,16 @@ fn main() {
 fn print_help_menu() {
     println!(
         r#"
-Valid Operation                 Syntax
+VALID OPERATIONS:
+    Operation                       Syntax
 
-Swap two rows                   S (row1 index) (row2 index)
+    Swap two rows                   S (row1 index) (row2 index)
 
-Multiple a row                  M (scaler value) (row index)
+    Multiple a row                  M (scaler value) (row index)
 
-Replace `target row` with       R (scaler value) (scaler row index) (target row index)
-the product of the `scaler 
-row` with `scaler value`
+    Replace `target row` with       R (scaler value) (scaler row index) (target row index)
+    the product of the `scaler 
+    row` with `scaler value`
 "#
     );
 }
