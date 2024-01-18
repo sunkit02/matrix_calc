@@ -23,11 +23,12 @@ fn main() {
             break 'read;
         }
 
-        for c in line.split(' ') {
+        for c in line.trim().split(' ') {
             match c.parse::<f64>() {
                 Ok(n) => row.push(n),
                 Err(e) => {
-                    println!("Error: {}", e);
+                    println!("Error: {}.", e);
+                    println!("Please ensure that the numbers are separated by only one space.");
 
                     print!("> ");
                     stdout().flush().expect("Failed to flush stdout.");
