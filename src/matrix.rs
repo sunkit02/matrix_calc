@@ -1,10 +1,12 @@
-use std::fmt::{self, Formatter};
+use std::fmt::{self, Formatter, Write};
+
+use fraction::Fraction;
 
 use crate::operations::Operations;
 
 pub struct Matrix {
-    elements: Vec<Vec<f64>>,
-    checksum: f64,
+    elements: Vec<Vec<Fraction>>,
+    checksum: Fraction,
 }
 
 impl fmt::Debug for Matrix {
@@ -19,10 +21,16 @@ impl fmt::Display for Matrix {
             return Ok(());
         }
 
-        let last = self.height() - 1;
         for (i, row) in self.elements.iter().enumerate() {
-            f.write_fmt(format_args!("{:?}", row))?;
-            if i != last {
+            f.write_fmt(format_args!("[{}] ", i))?;
+            for (j, n) in row.iter().enumerate() {
+                f.write_fmt(format_args!("{}", n))?;
+                if j < row.len() - 1 {
+                    f.write_str(", ")?;
+                }
+            }
+            f.write_char(']')?;
+            if i < self.height() - 1 {
                 f.write_str("\n")?;
             }
         }
@@ -46,20 +54,20 @@ impl Matrix {
     pub fn new() -> Self {
         Self {
             elements: Vec::new(),
-            checksum: 0.0,
+            checksum: Fraction::from(0),
         }
     }
 
     pub fn from_iter<I, Inner>(iter: I) -> Result<Self, String>
     where
         I: IntoIterator<Item = Inner>,
-        Inner: IntoIterator<Item = f64>,
+        Inner: IntoIterator<Item = Fraction>,
     {
         let iter = iter.into_iter();
 
         let mut matrix = Self {
             elements: Vec::with_capacity(iter.size_hint().0),
-            checksum: 0.0,
+            checksum: Fraction::from(0),
         };
 
         for row in iter {
@@ -71,12 +79,16 @@ impl Matrix {
 
     pub fn insert_row<I>(&mut self, row: I) -> Result<(), String>
     where
-        I: IntoIterator<Item = f64>,
+        I: IntoIterator<Item = Fraction>,
     {
         let row = row.into_iter().enumerate();
         let mut m_row = Vec::with_capacity(row.size_hint().0);
         for (i, n) in row {
-            self.checksum += calc_checksum(self.height() as f64, i as f64, n);
+            self.checksum += calc_checksum(
+                &Fraction::from(self.height() as f64),
+                &Fraction::from(i as f64),
+                &n,
+            );
             m_row.push(n);
         }
 
@@ -123,11 +135,12 @@ impl Matrix {
         Ok(())
     }
 
-    pub fn set(&mut self, (x, y): (usize, usize), value: f64) -> Result<(), String> {
+    pub fn set(&mut self, (x, y): (usize, usize), value: Fraction) -> Result<(), String> {
         self.check_xy((x, y))?;
 
         let n = self.elements[x][y];
-        let diff = calc_checksum(x as f64, y as f64, n) - calc_checksum(x as f64, y as f64, value);
+        let diff = calc_checksum(&Fraction::from(x as u64), &Fraction::from(y as u64), &n)
+            - calc_checksum(&Fraction::from(x as f64), &Fraction::from(y as f64), &value);
 
         self.elements[x][y] = value;
         self.checksum += diff;
@@ -135,12 +148,12 @@ impl Matrix {
         Ok(())
     }
 
-    pub fn get(&self, (x, y): (usize, usize)) -> Result<f64, String> {
+    pub fn get(&self, (x, y): (usize, usize)) -> Result<Fraction, String> {
         self.check_xy((x, y))?;
         return Ok(self.elements[x][y]);
     }
 
-    pub fn checksum(&self) -> f64 {
+    pub fn checksum(&self) -> Fraction {
         self.checksum
     }
 
@@ -168,8 +181,13 @@ impl Matrix {
                     let old = self.elements[rhs][i];
                     let new = self.elements[lhs][i];
 
-                    let diff = calc_checksum(rhs as f64, i as f64, old)
-                        - calc_checksum(lhs as f64, i as f64, new);
+                    let diff =
+                        calc_checksum(&Fraction::from(rhs as u64), &Fraction::from(i as u64), &old)
+                            - calc_checksum(
+                                &Fraction::from(lhs as f64),
+                                &Fraction::from(i as f64),
+                                &new,
+                            );
                     self.checksum += diff;
                 }
 
@@ -177,8 +195,13 @@ impl Matrix {
                     let old = self.elements[lhs][i];
                     let new = self.elements[rhs][i];
 
-                    let diff = calc_checksum(lhs as f64, i as f64, old)
-                        - calc_checksum(rhs as f64, i as f64, new);
+                    let diff =
+                        calc_checksum(&Fraction::from(lhs as u64), &Fraction::from(i as u64), &old)
+                            - calc_checksum(
+                                &Fraction::from(rhs as f64),
+                                &Fraction::from(i as f64),
+                                &new,
+                            );
                     self.checksum += diff;
                 }
             }
@@ -206,7 +229,7 @@ impl Matrix {
                 let len = self.elements[to_row].len();
                 for i in 0..len {
                     let xy = (to_row, i);
-                    self.set(xy, self.get(xy)? * scaler_row[i])?;
+                    self.set(xy, self.get(xy)? + scaler_row[i])?;
                 }
             }
             // Ignore
@@ -226,6 +249,6 @@ impl Matrix {
     }
 }
 
-fn calc_checksum(x: f64, y: f64, n: f64) -> f64 {
-    (x + y) * n
+fn calc_checksum(x: &Fraction, y: &Fraction, n: &Fraction) -> Fraction {
+    (x + y) * *n
 }

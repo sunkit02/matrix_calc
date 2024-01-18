@@ -1,4 +1,7 @@
 use std::io::{stdin, stdout, Write};
+use std::str::FromStr;
+
+use fraction::{Fraction, ToPrimitive};
 
 use crate::{matrix::Matrix, operations::Operations};
 
@@ -23,8 +26,8 @@ fn main() {
             break 'read;
         }
 
-        for c in line.trim().split(' ') {
-            match c.parse::<f64>() {
+        for token in line.trim().split(' ') {
+            match Fraction::from_str(token) {
                 Ok(n) => row.push(n),
                 Err(e) => {
                     println!("Error: {}.", e);
@@ -50,7 +53,13 @@ fn main() {
         return;
     }
 
-    println!("\nMatrix (checksum: {}):", matrix.checksum());
+    println!(
+        "\nMatrix (checksum: {}):",
+        matrix
+            .checksum()
+            .to_f64()
+            .expect("Failed to convert from `Fraction` to `f64")
+    );
     println!("{}\n", matrix);
     print!("> ");
     stdout().flush().expect("Failed to flush stdout.");
@@ -73,7 +82,7 @@ fn main() {
             }
         };
 
-        println!("$ {}", op);
+        println!("$ {}\n", op);
         match op {
             Operations::ShowHelp => print_help_menu(),
             op => match matrix.operate(op) {
