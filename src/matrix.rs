@@ -159,6 +159,21 @@ impl Matrix {
     }
 
     pub fn swap_rows(&mut self, lhs: usize, rhs: usize) -> Result<(), String> {
+        let max_row = self.height() - 1;
+        if lhs > max_row {
+            return Err(format!(
+                "Failed to access row at index: {}. Max: {}",
+                lhs, max_row
+            ));
+        }
+
+        if rhs > max_row {
+            return Err(format!(
+                "Failed to access row at index: {}. Max: {}",
+                rhs, max_row
+            ));
+        }
+
         if lhs >= self.height() {
             return Err(format!(
                 "Invalid row. Matrix max row index is {}, Got: {}.",
@@ -198,6 +213,14 @@ impl Matrix {
     }
 
     pub fn multiply_row(&mut self, row: usize, scaler: Fraction) -> Result<(), String> {
+        let max_row = self.height() - 1;
+        if row > max_row {
+            return Err(format!(
+                "Failed to access row at index: {}. Max: {}",
+                row, max_row
+            ));
+        }
+
         let len = self.elements[row].len();
         for i in 0..len {
             let xy = (row, i);
@@ -213,6 +236,13 @@ impl Matrix {
         scaler_row: usize,
         target_row: usize,
     ) -> Result<(), String> {
+        let max_row = self.height() - 1;
+        if scaler_row > max_row {
+            return Err(format!(
+                "Failed to access row at index: {}. Max: {}",
+                scaler_row, max_row
+            ));
+        }
         let scaler_row = self.elements[scaler_row]
             .iter()
             .map(|n| n * scaler)

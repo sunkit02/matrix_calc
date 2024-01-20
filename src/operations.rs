@@ -20,6 +20,9 @@ pub enum Operations {
         target_row: usize,
     },
     ShowHelp,
+    // TODO: SetValue
+    // TODO: ShowMatrix
+    // TODO: Undo
 }
 
 impl TryFrom<&str> for Operations {

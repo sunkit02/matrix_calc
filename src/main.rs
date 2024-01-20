@@ -8,6 +8,7 @@ use crate::{matrix::Matrix, operations::Operations};
 mod matrix;
 mod operations;
 
+// TODO: Refactor into lib and bin crates
 fn main() {
     println!(
         "Please enter values of each row for your matrix space separeted (Empty row to stop):"
