@@ -112,9 +112,12 @@ fn main() {
                     }
                     Err(e) => println!("Error: {}", e),
                 },
-                Operations::ClearScreen => print!("{esc}[2J{esc}[1;1H", esc = 27 as char),
+                Operations::ClearScreen => clear_screen(),
                 Operations::ShowMatrix => println!("{}\n", matrix),
-                Operations::Restart => continue 'outer,
+                Operations::Restart => {
+                    clear_screen();
+                    continue 'outer;
+                }
                 Operations::ExitProgram => {
                     println!("\nExiting program...");
                     std::process::exit(0);
@@ -149,4 +152,8 @@ VALID COMMANDS:
     Exit program                    q or exit
 "#
     );
+}
+
+fn clear_screen() {
+    print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
 }
