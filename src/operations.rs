@@ -23,6 +23,8 @@ pub enum Operations {
     // TODO: SetValue
     // TODO: ShowMatrix
     // TODO: Undo
+    ClearScreen,
+    ExitProgram,
 }
 
 impl TryFrom<&str> for Operations {
@@ -30,22 +32,20 @@ impl TryFrom<&str> for Operations {
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         let (op, rest) = match value.split_once(' ') {
-            Some(value) => value,
+            Some(splits) => splits,
             None => {
                 let value_lower = value.to_lowercase();
-                if value_lower.as_str() == "h" || value_lower.as_str() == "help" {
-                    (value, "")
-                } else {
-                    return Err(format!(
-                        "\"{}\" is not a complete instruction.",
-                        value_lower
-                    ));
+                match value_lower.as_str() {
+                    "h" | "help" | "c" | "clear" | "q" | "exit" => (value, ""),
+                    s => return Err(format!("\"{}\" is not a complete instruction.", s)),
                 }
             }
         };
 
         match op.to_lowercase().as_str() {
             "h" | "help" => Ok(Self::ShowHelp),
+            "c" | "clear" => Ok(Self::ClearScreen),
+            "q" | "exit" => Ok(Self::ExitProgram),
             "s" => {
                 let (lhs, rhs) = if let Some(rest) = rest.split_once(' ') {
                     rest
@@ -166,6 +166,8 @@ impl fmt::Display for Operations {
                 scaler, scaler_row, target_row, target_row
             )),
             ShowHelp => f.write_str("ShowHelp"),
+            ClearScreen => f.write_str("Clear Screen"),
+            ExitProgram => f.write_str("Exit Program"),
         }
     }
 }

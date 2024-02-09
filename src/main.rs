@@ -111,6 +111,11 @@ fn main() {
                 }
                 Err(e) => println!("Error: {}", e),
             },
+            Operations::ClearScreen => print!("{esc}[2J{esc}[1;1H", esc = 27 as char),
+            Operations::ExitProgram => {
+                println!("\nExiting program...");
+                std::process::exit(0);
+            }
         }
 
         print!("> ");
@@ -131,6 +136,11 @@ VALID OPERATIONS:
     Replace `target row` with       R (scaler value) (scaler row index) (target row index)
     the product of the `scaler 
     row` with `scaler value`
+
+VALID COMMANDS:
+    Clear screen                    c or clear
+    Show help                       h or help
+    Exit program                    q or exit
 "#
     );
 }
