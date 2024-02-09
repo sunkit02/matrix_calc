@@ -24,6 +24,7 @@ pub enum Operations {
     // TODO: ShowMatrix
     // TODO: Undo
     ClearScreen,
+    ShowMatrix,
     ExitProgram,
 }
 
@@ -36,7 +37,7 @@ impl TryFrom<&str> for Operations {
             None => {
                 let value_lower = value.to_lowercase();
                 match value_lower.as_str() {
-                    "h" | "help" | "c" | "clear" | "q" | "exit" => (value, ""),
+                    "h" | "help" | "c" | "clear" | "q" | "exit" | "show" => (value, ""),
                     s => return Err(format!("\"{}\" is not a complete instruction.", s)),
                 }
             }
@@ -45,6 +46,7 @@ impl TryFrom<&str> for Operations {
         match op.to_lowercase().as_str() {
             "h" | "help" => Ok(Self::ShowHelp),
             "c" | "clear" => Ok(Self::ClearScreen),
+            "show" => Ok(Self::ShowMatrix),
             "q" | "exit" => Ok(Self::ExitProgram),
             "s" => {
                 let (lhs, rhs) = if let Some(rest) = rest.split_once(' ') {
@@ -167,6 +169,7 @@ impl fmt::Display for Operations {
             )),
             ShowHelp => f.write_str("ShowHelp"),
             ClearScreen => f.write_str("Clear Screen"),
+            ShowMatrix => f.write_str("Show Matrix"),
             ExitProgram => f.write_str("Exit Program"),
         }
     }
